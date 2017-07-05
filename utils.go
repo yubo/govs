@@ -106,3 +106,14 @@ func Parse_service(o *CallOptions) error {
 	}
 	return fmt.Errorf("service syntax error")
 }
+
+func ctl_state_name(s int) byte {
+	switch s {
+	case VS_CTL_S_SYNC:
+		return 's'
+	case VS_CTL_S_PENDING:
+		return 'p'
+	default:
+		return '-'
+	}
+}

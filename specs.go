@@ -17,6 +17,12 @@ import (
 )
 
 const (
+	VS_CTL_S_SYNC = iota
+	VS_CTL_S_PENDING
+	VS_CTL_S_LAST
+)
+
+const (
 	VS_STATS_IO = iota
 	VS_STATS_WORKER
 	VS_STATS_DEV
@@ -456,6 +462,7 @@ func (r Vs_timeout_r) String() string {
 }
 
 type Vs_stats_ifa struct {
+	Port       int
 	Rx_packets int64
 	Rx_dropped int64
 	Tx_packets int64
@@ -470,7 +477,7 @@ type Vs_stats_io_entry struct {
 	Rx_nic_queues_iters []int64
 	Tx_nic_ports_count  []int64
 	Tx_nic_ports_iters  []int64
-	Kni                 map[string]Vs_stats_ifa
+	Kni                 []Vs_stats_ifa
 	Kni_deq             int64
 	Kni_deq_err         int64
 }
@@ -481,11 +488,73 @@ type Vs_stats_io_r struct {
 	Io   []Vs_stats_io_entry
 }
 
+func max_len(is ...[]int64) (l int) {
+	for _, v := range is {
+		if l < len(v) {
+			l = len(v)
+		}
+	}
+	return l
+}
+
+/*
+id kni_deq kni_err  k_rx rx_d tx tx_d
+*/
 func (r Vs_stats_io_r) String() string {
 	if r.Code != 0 {
 		return fmt.Sprintf("%s:%s", Ecode(r.Code), r.Msg)
 	}
-	return fmt.Sprintf("io: %v", r.Io)
+	var ret string
+	for _, e := range r.Io {
+		ret += fmt.Sprintf("%-10s %10s %10s\n",
+			"core", "kni_deq", "kni_deq_err")
+		ret += fmt.Sprintf("%-10d %10d %10d\n\n",
+			e.Core, e.Kni_deq, e.Kni_deq_err)
+		n := max_len(e.Rx_rings_count, e.Rx_nic_queues_count, e.Tx_nic_ports_count)
+		if n > len(e.Kni) {
+			n = len(e.Kni)
+		}
+
+		m := make([][11]int64, n)
+		for k, _ := range e.Rx_rings_count {
+			m[k][0] = e.Rx_rings_count[k]
+			m[k][1] = e.Rx_rings_iters[k]
+		}
+		for k, _ := range e.Rx_nic_queues_count {
+			m[k][2] = e.Rx_nic_queues_count[k]
+			m[k][3] = e.Rx_nic_queues_iters[k]
+		}
+		for k, _ := range e.Tx_nic_ports_count {
+			m[k][4] = e.Tx_nic_ports_count[k]
+			m[k][5] = e.Tx_nic_ports_iters[k]
+		}
+		for k, v := range e.Kni {
+			m[k][6] = int64(v.Port)
+			m[k][7] = v.Rx_packets
+			m[k][8] = v.Rx_dropped
+			m[k][9] = v.Tx_packets
+			m[k][10] = v.Tx_dropped
+		}
+
+		ret += fmt.Sprintf("%-10s %10s %10s %10s %10s "+
+			"%10s %10s %10s %10s %10s "+
+			"%10s %10s\n",
+			"id", "rx_ring_c", "rx_ring_i", "rx_nic_q_c", "rx_nic_q_i",
+			"tx_nic_p_c", "tx_nic_p_i", "kni_port", "kni_rx_pkt", "kni_rx_drop",
+			"kni_tx_pkt", "kni_tx_drop")
+		for i := 0; i < n; i++ {
+			ret += fmt.Sprintf("%-10d %10d %10d %10d %10d "+
+				"%10d %10d %10d %10d %10d "+
+				"%10d %10d\n",
+				i, m[i][0], m[i][1], m[i][2], m[i][3],
+				m[i][4], m[i][5], m[i][6], m[i][7], m[i][8],
+				m[i][9], m[i][10])
+		}
+
+		ret += fmt.Sprintf("\n")
+
+	}
+	return ret
 }
 
 type Vs_stats_worker_entry struct {
@@ -515,7 +584,21 @@ func (r Vs_stats_worker_r) String() string {
 	if r.Code != 0 {
 		return fmt.Sprintf("%s:%s", Ecode(r.Code), r.Msg)
 	}
-	return fmt.Sprintf("Worker: %v", r.Worker)
+	ret := fmt.Sprintf("%-5s %10s %10s %10s %10s "+
+		"%10s %10s %10s %10s %10s "+
+		"%10s %10s %10s %10s\n",
+		"core", "ipmiss", "frag", "icmp", "pkt",
+		"v4sctp", "ospf", "unknow(v4)", "drop", "kni_enq",
+		"kni_err", "arp", "ipv6", "unknow")
+	for _, e := range r.Worker {
+		ret += fmt.Sprintf("%-5d %10d %10d %10d %10d "+
+			"%10d %10d %10d %10d %10d "+
+			"%10d %10d %10d %10d\n",
+			e.Core, e.Ipmiss, e.Frag, e.Icmp, e.V4pkt,
+			e.V4sctp, e.V4ospf, e.V4unknow, e.V4drop, e.Kni_enq,
+			e.Kni_enq_err, e.Arp, e.Ipv6, e.Unknow)
+	}
+	return ret
 }
 
 type Vs_stats_dev_entry struct {
@@ -540,7 +623,15 @@ func (r Vs_stats_dev_r) String() string {
 	if r.Code != 0 {
 		return fmt.Sprintf("%s:%s", Ecode(r.Code), r.Msg)
 	}
-	return fmt.Sprintf("Dev: %v", r.Dev)
+	ret := fmt.Sprintf("%-10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
+		"port", "ipackets", "Opackets", "ibytes", "obytes",
+		"imissed", "ierrors", "oerrors", "rx_nombuf")
+	for _, e := range r.Dev {
+		ret += fmt.Sprintf("%-10d %10d %10d %10d %10d %10d %10d %10d %10d\n",
+			e.Port, e.Ipackets, e.Opackets, e.Ibytes, e.Obytes,
+			e.Imissed, e.Ierrors, e.Oerrors, e.Rx_nombuf)
+	}
+	return ret
 }
 
 type Vs_stats_ctl_r struct {
@@ -554,6 +645,28 @@ type Vs_stats_ctl_r struct {
 		Seq          int
 		State        int
 	}
+}
+
+/*
+id                seq      n_svc      state
+-                   0          0          -
+
+0                   0          0          s
+*/
+func (r Vs_stats_ctl_r) String() string {
+	if r.Code != 0 {
+		return fmt.Sprintf("%s:%s", Ecode(r.Code), r.Msg)
+	}
+	ret := fmt.Sprintf("%-10s %10s %10s %10s\n",
+		"id", "seq", "n_svc", "state")
+	ret += fmt.Sprintf("%-10s %10d %10d %10c\n\n",
+		"-", r.Seq, r.Num_services, '-')
+	for _, e := range r.Workers {
+		ret += fmt.Sprintf("%-10d %10d %10d %10c\n",
+			e.Worker_id, e.Seq, e.Num_services, ctl_state_name(e.State))
+
+	}
+	return ret
 }
 
 /* set ctl */

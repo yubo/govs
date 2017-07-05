@@ -624,7 +624,7 @@ func (r Vs_stats_dev_r) String() string {
 		return fmt.Sprintf("%s:%s", Ecode(r.Code), r.Msg)
 	}
 	ret := fmt.Sprintf("%-10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
-		"port", "ipackets", "Opackets", "ibytes", "obytes",
+		"port", "ipackets", "opackets", "ibytes", "obytes",
 		"imissed", "ierrors", "oerrors", "rx_nombuf")
 	for _, e := range r.Dev {
 		ret += fmt.Sprintf("%-10d %10d %10d %10d %10d %10d %10d %10d %10d\n",

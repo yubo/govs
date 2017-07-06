@@ -8,12 +8,13 @@
 package govs
 
 import (
+	"net"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 )
 
 const (
-	URL = "127.0.0.1:1105"
+	URL = "/tmp/dpvs.sock"
 )
 
 var (
@@ -21,9 +22,13 @@ var (
 	CmdOpt CmdOptions
 )
 
-func Vs_dial() (err error) {
-	client, err = jsonrpc.Dial("tcp", URL)
-	return err
+func Vs_dial() error {
+	conn, err := net.Dial("unix", URL)
+	if err != nil {
+		return err
+	}
+	client = jsonrpc.NewClient(conn)
+	return nil
 }
 
 func Vs_close() {

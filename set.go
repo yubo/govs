@@ -7,27 +7,27 @@
  */
 package govs
 
-func Set_flush(o *CmdOptions) (error, *Vs_cmd_r) {
+func Set_flush(o *CmdOptions) (*Vs_cmd_r, error) {
 	var reply Vs_cmd_r
 	args := Vs_cmd_q{VS_CMD_FLUSH}
 
 	err := client.Call("api", args, &reply)
-	return err, &reply
+	return &reply, err
 }
 
-func Set_timeout(o *CmdOptions) (error, *Vs_cmd_r) {
+func Set_timeout(o *CmdOptions) (*Vs_cmd_r, error) {
 	var reply Vs_cmd_r
 	args := Vs_timeout_q{Cmd: VS_CMD_SET_CONFIG}
 
 	if err := args.Set(o.Timeout_s); err != nil {
-		return err, nil
+		return nil, err
 	}
 
 	err := client.Call("api", args, &reply)
-	return err, &reply
+	return &reply, err
 }
 
-func Set_zero(o *CmdOptions) (error, *Vs_cmd_r) {
+func Set_zero(o *CmdOptions) (*Vs_cmd_r, error) {
 	var reply Vs_cmd_r
 	args := Vs_service_q{
 		Cmd: VS_CMD_ZERO,
@@ -39,10 +39,10 @@ func Set_zero(o *CmdOptions) (error, *Vs_cmd_r) {
 	}
 
 	err := client.Call("api", args, &reply)
-	return err, &reply
+	return &reply, err
 }
 
-func Set_add(o *CmdOptions) (error, *Vs_cmd_r) {
+func Set_add(o *CmdOptions) (*Vs_cmd_r, error) {
 	var reply Vs_cmd_r
 	args := Vs_service_q{
 		Cmd: VS_CMD_NEW_SERVICE,
@@ -59,10 +59,10 @@ func Set_add(o *CmdOptions) (error, *Vs_cmd_r) {
 	}
 
 	err := client.Call("api", args, &reply)
-	return err, &reply
+	return &reply, err
 }
 
-func Set_edit(o *CmdOptions) (error, *Vs_cmd_r) {
+func Set_edit(o *CmdOptions) (*Vs_cmd_r, error) {
 	var reply Vs_cmd_r
 	args := Vs_service_q{
 		Cmd: VS_CMD_SET_SERVICE,
@@ -79,10 +79,10 @@ func Set_edit(o *CmdOptions) (error, *Vs_cmd_r) {
 	}
 
 	err := client.Call("api", args, &reply)
-	return err, &reply
+	return &reply, err
 }
 
-func Set_del(o *CmdOptions) (error, *Vs_cmd_r) {
+func Set_del(o *CmdOptions) (*Vs_cmd_r, error) {
 	var reply Vs_cmd_r
 	args := Vs_service_q{
 		Cmd: VS_CMD_DEL_SERVICE,
@@ -94,10 +94,10 @@ func Set_del(o *CmdOptions) (error, *Vs_cmd_r) {
 	}
 
 	err := client.Call("api", args, &reply)
-	return err, &reply
+	return &reply, err
 }
 
-func Set_adddest(o *CmdOptions) (error, *Vs_cmd_r) {
+func Set_adddest(o *CmdOptions) (*Vs_cmd_r, error) {
 	var reply Vs_cmd_r
 	args := Vs_dest_q{
 		Cmd: VS_CMD_NEW_DEST,
@@ -118,10 +118,10 @@ func Set_adddest(o *CmdOptions) (error, *Vs_cmd_r) {
 	}
 
 	err := client.Call("api", args, &reply)
-	return err, &reply
+	return &reply, err
 }
 
-func Set_editdest(o *CmdOptions) (error, *Vs_cmd_r) {
+func Set_editdest(o *CmdOptions) (*Vs_cmd_r, error) {
 	var reply Vs_cmd_r
 	args := Vs_dest_q{
 		Cmd: VS_CMD_SET_DEST,
@@ -142,10 +142,10 @@ func Set_editdest(o *CmdOptions) (error, *Vs_cmd_r) {
 	}
 
 	err := client.Call("api", args, &reply)
-	return err, &reply
+	return &reply, err
 }
 
-func Set_deldest(o *CmdOptions) (error, *Vs_cmd_r) {
+func Set_deldest(o *CmdOptions) (*Vs_cmd_r, error) {
 	var reply Vs_cmd_r
 	args := Vs_dest_q{
 		Cmd: VS_CMD_DEL_DEST,
@@ -161,10 +161,10 @@ func Set_deldest(o *CmdOptions) (error, *Vs_cmd_r) {
 	}
 
 	err := client.Call("api", args, &reply)
-	return err, &reply
+	return &reply, err
 }
 
-func Set_addladdr(o *CmdOptions) (error, *Vs_cmd_r) {
+func Set_addladdr(o *CmdOptions) (*Vs_cmd_r, error) {
 	var reply Vs_cmd_r
 	args := Vs_laddr_q{
 		Cmd: VS_CMD_NEW_LADDR,
@@ -180,10 +180,10 @@ func Set_addladdr(o *CmdOptions) (error, *Vs_cmd_r) {
 	}
 
 	err := client.Call("api", args, &reply)
-	return err, &reply
+	return &reply, err
 }
 
-func Set_delladdr(o *CmdOptions) (error, *Vs_cmd_r) {
+func Set_delladdr(o *CmdOptions) (*Vs_cmd_r, error) {
 	var reply Vs_cmd_r
 	args := Vs_laddr_q{
 		Cmd: VS_CMD_DEL_LADDR,
@@ -199,5 +199,5 @@ func Set_delladdr(o *CmdOptions) (error, *Vs_cmd_r) {
 	}
 
 	err := client.Call("api", args, &reply)
-	return err, &reply
+	return &reply, err
 }

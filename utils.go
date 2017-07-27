@@ -12,6 +12,15 @@ import (
 	"net"
 )
 
+func max_len(is ...[]int64) (l int) {
+	for _, v := range is {
+		if l < len(v) {
+			l = len(v)
+		}
+	}
+	return l
+}
+
 func ipToU32(p net.IP) uint32 {
 	// If IPv4, use dotted notation.
 	if p4 := p.To4(); len(p4) == net.IPv4len {

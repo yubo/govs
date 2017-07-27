@@ -125,13 +125,13 @@ func timeout_handle(arg interface{}) {
 	o := &opt.Opt
 
 	if o.Timeout_s != "" {
-		if err, timeout := govs.Set_timeout(o); err != nil {
+		if timeout, err := govs.Set_timeout(o); err != nil {
 			fmt.Println(err)
 		} else {
 			fmt.Println(timeout)
 		}
 	} else {
-		if err, timeout := govs.Get_timeout(o); err != nil {
+		if timeout, err := govs.Get_timeout(o); err != nil {
 			fmt.Println(err)
 		} else {
 			fmt.Println(timeout)
@@ -146,7 +146,7 @@ func list_handle(arg interface{}) {
 
 	if o.Addr.Ip != 0 {
 
-		err, svc := govs.Get_service(o)
+		svc, err := govs.Get_service(o)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -160,14 +160,14 @@ func list_handle(arg interface{}) {
 		}
 		fmt.Println(svc)
 		if !o.L {
-			err, dests := govs.Get_dests(o)
+			dests, err := govs.Get_dests(o)
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
 			fmt.Println(dests)
 		} else {
-			err, laddrs := govs.Get_laddrs(o)
+			laddrs, err := govs.Get_laddrs(o)
 			if err != nil {
 				fmt.Println(err)
 				return
@@ -177,7 +177,7 @@ func list_handle(arg interface{}) {
 		return
 	}
 
-	err, svcs := govs.Get_services(o)
+	svcs, err := govs.Get_services(o)
 
 	if err != nil {
 		fmt.Println(err)
@@ -197,14 +197,14 @@ func list_handle(arg interface{}) {
 		o.Protocol = govs.Protocol(svc.Protocol)
 
 		if !o.L {
-			err, dests := govs.Get_dests(o)
+			dests, err := govs.Get_dests(o)
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
 			fmt.Println(dests)
 		} else {
-			err, laddrs := govs.Get_laddrs(o)
+			laddrs, err := govs.Get_laddrs(o)
 			if err != nil {
 				fmt.Println(err)
 				return
@@ -215,7 +215,7 @@ func list_handle(arg interface{}) {
 }
 
 func flush_handle(arg interface{}) {
-	if err, reply := govs.Set_flush(nil); err != nil {
+	if reply, err := govs.Set_flush(nil); err != nil {
 		fmt.Println(err)
 	} else {
 		fmt.Println(reply)
@@ -226,7 +226,7 @@ func zero_handle(arg interface{}) {
 	opt := arg.(*govs.CallOptions)
 	govs.Parse_service(opt)
 
-	if err, reply := govs.Set_zero(&opt.Opt); err != nil {
+	if reply, err := govs.Set_zero(&opt.Opt); err != nil {
 		fmt.Println(err)
 	} else {
 		fmt.Println(reply)
@@ -246,11 +246,11 @@ func add_handle(arg interface{}) {
 	o := &opt.Opt
 
 	if o.Lip != 0 {
-		err, reply = govs.Set_addladdr(o)
+		reply, err = govs.Set_addladdr(o)
 	} else if o.Daddr.Ip != 0 {
-		err, reply = govs.Set_adddest(o)
+		reply, err = govs.Set_adddest(o)
 	} else {
-		err, reply = govs.Set_add(o)
+		reply, err = govs.Set_add(o)
 	}
 
 	if err != nil {
@@ -272,9 +272,9 @@ func edit_handle(arg interface{}) {
 	o := &opt.Opt
 
 	if o.Daddr.Ip != 0 {
-		err, reply = govs.Set_editdest(o)
+		reply, err = govs.Set_editdest(o)
 	} else {
-		err, reply = govs.Set_edit(o)
+		reply, err = govs.Set_edit(o)
 	}
 
 	if err != nil {
@@ -296,11 +296,11 @@ func del_handle(arg interface{}) {
 	o := &opt.Opt
 
 	if o.Lip != 0 {
-		err, reply = govs.Set_delladdr(o)
+		reply, err = govs.Set_delladdr(o)
 	} else if o.Daddr.Ip != 0 {
-		err, reply = govs.Set_deldest(o)
+		reply, err = govs.Set_deldest(o)
 	} else {
-		err, reply = govs.Set_del(o)
+		reply, err = govs.Set_del(o)
 	}
 
 	if err != nil {
@@ -313,28 +313,35 @@ func del_handle(arg interface{}) {
 func stats_handle(arg interface{}) {
 	switch govs.CmdOpt.Typ {
 	case "io":
-		err, relay := govs.Get_stats_io(govs.CmdOpt.Id)
+		relay, err := govs.Get_stats_io(govs.CmdOpt.Id)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 		fmt.Println(relay)
 	case "worker":
-		err, relay := govs.Get_stats_worker(govs.CmdOpt.Id)
+		relay, err := govs.Get_stats_worker(govs.CmdOpt.Id)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 		fmt.Println(relay)
 	case "dev":
-		err, relay := govs.Get_stats_dev(govs.CmdOpt.Id)
+		relay, err := govs.Get_stats_dev(govs.CmdOpt.Id)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 		fmt.Println(relay)
 	case "ctl":
-		err, relay := govs.Get_stats_ctl()
+		relay, err := govs.Get_stats_ctl()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(relay)
+	case "mem":
+		relay, err := govs.Get_stats_mem()
 		if err != nil {
 			fmt.Println(err)
 			return

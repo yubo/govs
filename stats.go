@@ -9,6 +9,12 @@ package govs
 
 import "fmt"
 
+const (
+	VS_CTL_S_SYNC = iota
+	VS_CTL_S_PENDING
+	VS_CTL_S_LAST
+)
+
 type Vs_stats_ifa struct {
 	Port       int
 	Rx_packets int64
@@ -228,12 +234,6 @@ type Vs_stats_mem_r struct {
 	}
 }
 
-/*
-id                mbuf      svc      rs laddr conn
--                   0          0          -
-
-0                   0          0          s
-*/
 func (r Vs_stats_mem_r) String() string {
 	if r.Code != 0 {
 		return fmt.Sprintf("%s:%s", Ecode(r.Code), r.Msg)
@@ -255,6 +255,21 @@ func (r Vs_stats_mem_r) String() string {
 	return ret
 }
 
+type Vs_stats_q struct {
+	Type int
+	Id   int
+}
+
+func ctl_state_name(s int) byte {
+	switch s {
+	case VS_CTL_S_SYNC:
+		return 's'
+	case VS_CTL_S_PENDING:
+		return 'p'
+	default:
+		return '-'
+	}
+}
 func Get_stats_io(id int) (*Vs_stats_io_r, error) {
 	args := Vs_stats_q{Type: VS_STATS_IO, Id: id}
 	reply := &Vs_stats_io_r{}

@@ -25,80 +25,68 @@ func init() {
 
 	// status
 	cmd := flags.NewCommand("stats", "get dpvs stats io stats", stats_handle, flag.ExitOnError)
-	cmd.StringVar(&govs.CmdOpt.Typ, "t", "io", "type of the stats name")
+	cmd.StringVar(&govs.CmdOpt.Typ, "t", "io", "type of the stats name(io/worker/dev/ctl/mem)")
 	cmd.IntVar(&govs.CmdOpt.Id, "i", 0, "id of the stats object")
 
-	/*
-		// flush
-		flags.NewCommand("flush", "Flush the virtual service", flush_handle, flag.ExitOnError)
+	// flush
+	flags.NewCommand("flush", "Flush the virtual service", flush_handle, flag.ExitOnError)
 
-		// zero
-		cmd = flags.NewCommand("zero", "zero conters in Service/all", zero_handle, flag.ExitOnError)
-		cmd.BoolVar(&govs.CmdOpt.TCP, "t", false, "tcp service")
-		cmd.BoolVar(&govs.CmdOpt.UDP, "u", false, "udp service")
+	// zero
+	cmd = flags.NewCommand("zero", "zero conters in Service/all", zero_handle, flag.ExitOnError)
+	cmd.BoolVar(&govs.CmdOpt.TCP, "t", false, "tcp service")
+	cmd.BoolVar(&govs.CmdOpt.UDP, "u", false, "udp service")
 
-		// info
-		flags.NewCommand("info", "show dpvs information", info_handle, flag.ExitOnError)
+	// timeout
+	cmd = flags.NewCommand("timeout", "show/set timeout", timeout_handle, flag.ExitOnError)
+	cmd.StringVar(&govs.CmdOpt.Timeout_s, "set", "", "set <tcp,tcp_fin,udp>")
 
-		// timeout
-		cmd = flags.NewCommand("timeout", "show/set timeout", timeout_handle, flag.ExitOnError)
-		cmd.StringVar(&govs.CmdOpt.Timeout_s, "set", "", "set tcp,tcp_fin,udp timeout")
+	// list
+	cmd = flags.NewCommand("list", "list -t|u host:[port]", list_handle, flag.ExitOnError)
+	cmd.BoolVar(&govs.CmdOpt.TCP, "t", false, "tcp service")
+	cmd.BoolVar(&govs.CmdOpt.UDP, "u", false, "udp service")
+	cmd.BoolVar(&govs.CmdOpt.L, "G", false, "get local address")
 
-		// list
-		cmd = flags.NewCommand("list", "list -t|u host:[port]", list_handle, flag.ExitOnError)
-		cmd.BoolVar(&govs.CmdOpt.TCP, "t", false, "tcp service")
-		cmd.BoolVar(&govs.CmdOpt.UDP, "u", false, "udp service")
-		cmd.BoolVar(&govs.CmdOpt.L, "G", false, "get local address")
-		cmd.IntVar(&govs.CmdOpt.Num_services, "num_services", 0, "max service entries list")
-		cmd.IntVar(&govs.CmdOpt.Number, "n", 0, "max laddr/dest entries list")
+	// add
+	cmd = flags.NewCommand("add", "add vs/rs/laddr", add_handle, flag.ExitOnError)
+	cmd.BoolVar(&govs.CmdOpt.TCP, "t", false, "tcp service")
+	cmd.BoolVar(&govs.CmdOpt.UDP, "u", false, "udp service")
+	cmd.Var(&govs.CmdOpt.Netmask, "m", "netmask default 0.0.0.0")
+	cmd.StringVar(&govs.CmdOpt.Sched_name, "sched", "rr", "the service sched name rr/wrr")
+	cmd.UintVar(&govs.CmdOpt.Flags, "flags", 0, "the service flags")
 
-		// add
-		cmd = flags.NewCommand("add", "add vs/rs/laddr", add_handle, flag.ExitOnError)
-		cmd.UintVar(&govs.CmdOpt.Nic, "nic", 0, "the service addr bind nic port")
-		cmd.BoolVar(&govs.CmdOpt.TCP, "t", false, "tcp service")
-		cmd.BoolVar(&govs.CmdOpt.UDP, "u", false, "udp service")
-		cmd.StringVar(&govs.CmdOpt.Sched_name, "sched", "rr", "the service sched name")
-		cmd.UintVar(&govs.CmdOpt.Flags, "flags", 0, "the service flags")
-		cmd.UintVar(&govs.CmdOpt.Timeout, "persistent", 0, "persistent service -persistent [timeout]")
-		// adddest
-		cmd.Var(&govs.CmdOpt.Daddr, "dest", "service-address is host[:port]")
-		cmd.UintVar(&govs.CmdOpt.Dnic, "dest-nic", 0, "service-address out nic port(no need)")
-		cmd.UintVar(&govs.CmdOpt.Conn_flags, "conn_flags", 0, "the conn flags")
-		cmd.IntVar(&govs.CmdOpt.Weight, "weight", 0, "capacity of real server")
-		cmd.UintVar(&govs.CmdOpt.U_threshold, "x", 0, "upper threshold of connections")
-		cmd.UintVar(&govs.CmdOpt.L_threshold, "y", 0, "lower threshold of connections")
-		// addladdr
-		cmd.Var(&govs.CmdOpt.Lip, "laddr", "local-address is host")
-		cmd.UintVar(&govs.CmdOpt.Lnic, "lnic", 0, "local addr bind nic port")
+	// adddest
+	cmd.Var(&govs.CmdOpt.Daddr, "dest", "service-address is host[:port]")
+	cmd.UintVar(&govs.CmdOpt.Conn_flags, "conn_flags", 0, "the conn flags")
+	cmd.IntVar(&govs.CmdOpt.Weight, "weight", 0, "capacity of real server")
+	cmd.UintVar(&govs.CmdOpt.U_threshold, "x", 0, "upper threshold of connections")
+	cmd.UintVar(&govs.CmdOpt.L_threshold, "y", 0, "lower threshold of connections")
+	// addladdr
+	cmd.Var(&govs.CmdOpt.Lip, "laddr", "local-address is host")
 
-		// edit
-		cmd = flags.NewCommand("edit", "edit vs/rs/laddr", edit_handle, flag.ExitOnError)
-		cmd.UintVar(&govs.CmdOpt.Nic, "nic", 0, "the service addr bind nic port")
-		cmd.BoolVar(&govs.CmdOpt.TCP, "t", false, "tcp service")
-		cmd.BoolVar(&govs.CmdOpt.UDP, "u", false, "udp service")
-		cmd.StringVar(&govs.CmdOpt.Sched_name, "sched", "rr", "the service sched name")
-		cmd.UintVar(&govs.CmdOpt.Flags, "flags", 0, "the service flags")
-		cmd.UintVar(&govs.CmdOpt.Timeout, "persistent", 0, "persistent service -persistent [timeout]")
-		// editdest
-		cmd.Var(&govs.CmdOpt.Daddr, "dest", "service-address is host[:port]")
-		cmd.UintVar(&govs.CmdOpt.Dnic, "dest-nic", 0, "service-address out nic port(no need)")
-		cmd.UintVar(&govs.CmdOpt.Conn_flags, "conn_flags", 0, "the conn flags")
-		cmd.IntVar(&govs.CmdOpt.Weight, "weight", 0, "capacity of real server")
-		cmd.UintVar(&govs.CmdOpt.U_threshold, "x", 0, "upper threshold of connections")
-		cmd.UintVar(&govs.CmdOpt.L_threshold, "y", 0, "lower threshold of connections")
-		// editladdr
-		cmd.Var(&govs.CmdOpt.Lip, "laddr", "local-address is host")
-		cmd.UintVar(&govs.CmdOpt.Lnic, "lnic", 0, "local addr bind nic port")
+	// edit
+	cmd = flags.NewCommand("edit", "edit vs/rs/laddr", edit_handle, flag.ExitOnError)
+	cmd.BoolVar(&govs.CmdOpt.TCP, "t", false, "tcp service")
+	cmd.BoolVar(&govs.CmdOpt.UDP, "u", false, "udp service")
+	cmd.StringVar(&govs.CmdOpt.Sched_name, "sched", "rr", "the service sched name")
+	cmd.UintVar(&govs.CmdOpt.Flags, "flags", 0, "the service flags")
 
-		// del
-		cmd = flags.NewCommand("del", "del vs/rs/laddr", del_handle, flag.ExitOnError)
-		cmd.BoolVar(&govs.CmdOpt.TCP, "t", false, "tcp service")
-		cmd.BoolVar(&govs.CmdOpt.UDP, "u", false, "udp service")
-		// deldest
-		cmd.Var(&govs.CmdOpt.Daddr, "dest", "service-address is host[:port]")
-		// delladdr
-		cmd.Var(&govs.CmdOpt.Lip, "laddr", "local-address is host")
-	*/
+	// editdest
+	cmd.Var(&govs.CmdOpt.Daddr, "dest", "service-address is host[:port]")
+	cmd.UintVar(&govs.CmdOpt.Conn_flags, "conn_flags", 0, "the conn flags")
+	cmd.IntVar(&govs.CmdOpt.Weight, "weight", 0, "capacity of real server")
+	cmd.UintVar(&govs.CmdOpt.U_threshold, "x", 0, "upper threshold of connections")
+	cmd.UintVar(&govs.CmdOpt.L_threshold, "y", 0, "lower threshold of connections")
+	// editladdr
+	cmd.Var(&govs.CmdOpt.Lip, "laddr", "local-address is host")
+
+	// del
+	cmd = flags.NewCommand("del", "del vs/rs/laddr", del_handle, flag.ExitOnError)
+	cmd.BoolVar(&govs.CmdOpt.TCP, "t", false, "tcp service")
+	cmd.BoolVar(&govs.CmdOpt.UDP, "u", false, "udp service")
+	// deldest
+	cmd.Var(&govs.CmdOpt.Daddr, "dest", "service-address is host[:port]")
+	// delladdr
+	cmd.Var(&govs.CmdOpt.Lip, "laddr", "local-address is host")
 }
 
 func version_handle(arg interface{}) {
@@ -110,7 +98,7 @@ func version_handle(arg interface{}) {
 }
 
 func info_handle(arg interface{}) {
-	if err, info := govs.Get_info(); err != nil {
+	if err, info := govs.Get_version(); err != nil {
 		fmt.Println(err)
 	} else {
 		fmt.Println(info)
@@ -119,9 +107,6 @@ func info_handle(arg interface{}) {
 
 func timeout_handle(arg interface{}) {
 	opt := arg.(*govs.CallOptions)
-	if len(opt.Args) > 0 {
-		opt.Opt.Addr.Set(opt.Args[0])
-	}
 	o := &opt.Opt
 
 	if o.Timeout_s != "" {
@@ -139,58 +124,67 @@ func timeout_handle(arg interface{}) {
 	}
 }
 
-func list_handle(arg interface{}) {
-	opt := arg.(*govs.CallOptions)
-	govs.Parse_service(opt)
-	o := &opt.Opt
+func list_svc_handle(o *govs.CmdOptions) {
 
-	if o.Addr.Ip != 0 {
+	ret, err := govs.Get_service(o)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-		svc, err := govs.Get_service(o)
+	if ret.Code != 0 {
+		fmt.Println(ret.Msg)
+		return
+	}
+
+	fmt.Println(govs.Svc_title())
+	if !o.L {
+		fmt.Println(govs.Dest_title())
+	} else {
+		fmt.Println(govs.Laddr_title())
+	}
+
+	fmt.Println(ret)
+	if !o.L {
+		dests, err := govs.Get_dests(o)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-
-		fmt.Println(govs.Svc_title())
-		if !o.L {
-			fmt.Println(govs.Dest_title())
-		} else {
-			fmt.Println(govs.Laddr_title())
+		fmt.Println(dests)
+	} else {
+		laddrs, err := govs.Get_laddrs(o)
+		if err != nil {
+			fmt.Println(err)
+			return
 		}
-		fmt.Println(svc)
-		if !o.L {
-			dests, err := govs.Get_dests(o)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			fmt.Println(dests)
-		} else {
-			laddrs, err := govs.Get_laddrs(o)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			fmt.Println(laddrs)
-		}
-		return
+		fmt.Println(laddrs)
 	}
+	return
+}
 
-	svcs, err := govs.Get_services(o)
+func list_svcs_handle(o *govs.CmdOptions) {
+
+	ret, err := govs.Get_services(o)
 
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	for _, svc := range svcs.Services {
-		fmt.Println(govs.Svc_title())
-		if !o.L {
-			fmt.Println(govs.Dest_title())
-		} else {
-			fmt.Println(govs.Laddr_title())
-		}
+	if ret.Code != 0 {
+		fmt.Println(ret.Msg)
+		return
+	}
+
+	fmt.Println(govs.Svc_title())
+	if !o.L {
+		fmt.Println(govs.Dest_title())
+	} else {
+		fmt.Println(govs.Laddr_title())
+	}
+
+	for _, svc := range ret.Services {
 		fmt.Println(svc)
 		o.Addr.Ip = svc.Addr
 		o.Addr.Port = svc.Port
@@ -198,20 +192,36 @@ func list_handle(arg interface{}) {
 
 		if !o.L {
 			dests, err := govs.Get_dests(o)
-			if err != nil {
-				fmt.Println(err)
-				return
+			if err != nil || dests.Code != 0 ||
+				len(dests.Dests) == 0 {
+				//fmt.Println(err)
+				continue
 			}
 			fmt.Println(dests)
 		} else {
 			laddrs, err := govs.Get_laddrs(o)
-			if err != nil {
-				fmt.Println(err)
+			if err != nil || laddrs.Code != 0 ||
+				len(laddrs.Laddrs) == 0 {
+				//fmt.Println(err)
 				return
 			}
 			fmt.Println(laddrs)
 		}
 	}
+
+}
+
+func list_handle(arg interface{}) {
+	opt := arg.(*govs.CallOptions)
+	govs.Parse_service(opt)
+	o := &opt.Opt
+
+	if o.Addr.Ip != 0 {
+		list_svc_handle(o)
+		return
+	}
+
+	list_svcs_handle(o)
 }
 
 func flush_handle(arg interface{}) {

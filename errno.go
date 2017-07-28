@@ -7,7 +7,10 @@
  */
 package govs
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 const (
 	EPERM   = 1  /* Operation not permitted */
@@ -96,3 +99,10 @@ func (e Ecode) String() string {
 	}
 	return e2s[i]
 }
+
+var (
+	errIpv4     = errors.New("syntax error: expect 192.168.0.1")
+	errIpv4Addr = errors.New("syntax error: expect 192.168.0.1 or 192.168.0.1:80")
+	errProtocol = errors.New("syntax error: expect tcp or udp")
+	errTimeout  = errors.New("syntax error: expect '1,3,5'  (second)")
+)

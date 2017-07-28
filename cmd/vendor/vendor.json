@@ -1,0 +1,19 @@
+{
+	"comment": "",
+	"ignore": "",
+	"package": [
+		{
+			"checksumSHA1": "2vTouOofrSfJcO7gR6RlU9ekrLU=",
+			"path": "github.com/yubo/gotool/flags",
+			"revision": "cd0d6d4107bf39a979302a4f76ed4a5eb233578c",
+			"revisionTime": "2017-05-03T02:14:27Z"
+		},
+		{
+			"checksumSHA1": "avMf1rc9XCW4VnGg8ijFD1SJ4Sw=",
+			"path": "github.com/yubo/govs",
+			"revision": "be4e2298b566fb10d8c8154a511514b267c30a30",
+			"revisionTime": "2017-07-27T10:57:01Z"
+		}
+	],
+	"rootPath": "github.com/yubo/govs/cmd"
+}

@@ -4,7 +4,13 @@
 # 
 # Authors:    Yu Bo <yubo@xiaomi.com>
 # 
+.PHONY: vendor
+
 all: govs
 
 govs: *.go cmd/govs/*.go
-	go build -o $@ cmd/govs/*.go
+	GOPATH=$(shell pwd)/gopath go build -o $@ ./cmd/govs
+
+vendor:
+	./scripts/vendor.sh
+

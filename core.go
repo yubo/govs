@@ -38,8 +38,8 @@ type CmdOptions struct {
 	Addr       Addr4
 	Nic        uint
 	Protocol   Protocol
-	TCP        bool
-	UDP        bool
+	TCP        string
+	UDP        string
 	Sched_name string
 	Flags      uint
 	Number     int

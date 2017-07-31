@@ -33,8 +33,8 @@ func init() {
 
 	// zero
 	cmd = flags.NewCommand("zero", "zero conters in Service/all", zero_handle, flag.ExitOnError)
-	cmd.BoolVar(&govs.CmdOpt.TCP, "t", false, "tcp service")
-	cmd.BoolVar(&govs.CmdOpt.UDP, "u", false, "udp service")
+	cmd.StringVar(&govs.CmdOpt.TCP, "t", "", "tcp service")
+	cmd.StringVar(&govs.CmdOpt.UDP, "u", "", "udp service")
 
 	// timeout
 	cmd = flags.NewCommand("timeout", "show/set timeout", timeout_handle, flag.ExitOnError)
@@ -42,14 +42,14 @@ func init() {
 
 	// list
 	cmd = flags.NewCommand("list", "list -t|u host:[port]", list_handle, flag.ExitOnError)
-	cmd.BoolVar(&govs.CmdOpt.TCP, "t", false, "tcp service")
-	cmd.BoolVar(&govs.CmdOpt.UDP, "u", false, "udp service")
+	cmd.StringVar(&govs.CmdOpt.TCP, "t", "", "tcp service")
+	cmd.StringVar(&govs.CmdOpt.UDP, "u", "", "udp service")
 	cmd.BoolVar(&govs.CmdOpt.L, "G", false, "get local address")
 
 	// add
 	cmd = flags.NewCommand("add", "add vs/rs/laddr", add_handle, flag.ExitOnError)
-	cmd.BoolVar(&govs.CmdOpt.TCP, "t", false, "tcp service")
-	cmd.BoolVar(&govs.CmdOpt.UDP, "u", false, "udp service")
+	cmd.StringVar(&govs.CmdOpt.TCP, "t", "", "tcp service")
+	cmd.StringVar(&govs.CmdOpt.UDP, "u", "", "udp service")
 	cmd.Var(&govs.CmdOpt.Netmask, "m", "netmask default 0.0.0.0")
 	cmd.StringVar(&govs.CmdOpt.Sched_name, "sched", "rr", "the service sched name rr/wrr")
 	cmd.UintVar(&govs.CmdOpt.Flags, "flags", 0, "the service flags")
@@ -65,8 +65,8 @@ func init() {
 
 	// edit
 	cmd = flags.NewCommand("edit", "edit vs/rs/laddr", edit_handle, flag.ExitOnError)
-	cmd.BoolVar(&govs.CmdOpt.TCP, "t", false, "tcp service")
-	cmd.BoolVar(&govs.CmdOpt.UDP, "u", false, "udp service")
+	cmd.StringVar(&govs.CmdOpt.TCP, "t", "", "tcp service")
+	cmd.StringVar(&govs.CmdOpt.UDP, "u", "", "udp service")
 	cmd.StringVar(&govs.CmdOpt.Sched_name, "sched", "rr", "the service sched name")
 	cmd.UintVar(&govs.CmdOpt.Flags, "flags", 0, "the service flags")
 
@@ -81,8 +81,8 @@ func init() {
 
 	// del
 	cmd = flags.NewCommand("del", "del vs/rs/laddr", del_handle, flag.ExitOnError)
-	cmd.BoolVar(&govs.CmdOpt.TCP, "t", false, "tcp service")
-	cmd.BoolVar(&govs.CmdOpt.UDP, "u", false, "udp service")
+	cmd.StringVar(&govs.CmdOpt.TCP, "t", "", "tcp service")
+	cmd.StringVar(&govs.CmdOpt.UDP, "u", "", "udp service")
 	// deldest
 	cmd.Var(&govs.CmdOpt.Daddr, "dest", "service-address is host[:port]")
 	// delladdr

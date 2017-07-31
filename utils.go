@@ -74,22 +74,21 @@ func get_protocol_name(p uint8) string {
 }
 
 func Parse_service(o *CallOptions) error {
-	if len(o.Args) > 0 {
-		if err := o.Opt.Addr.Set(o.Args[0]); err != nil {
-			return err
-		}
+	var addr string
 
-		if o.Opt.TCP && o.Opt.UDP {
-			return fmt.Errorf("service syntax error")
-		}
-
-		o.Opt.Protocol = IPPROTO_TCP
-
-		if o.Opt.UDP {
-			o.Opt.Protocol = IPPROTO_UDP
-		}
-
-		return nil
+	if o.Opt.UDP != "" {
+		addr = o.Opt.UDP
+		o.Opt.Protocol = IPPROTO_UDP
 	}
-	return fmt.Errorf("service syntax error")
+
+	if o.Opt.TCP != "" {
+		addr = o.Opt.TCP
+		o.Opt.Protocol = IPPROTO_TCP
+	}
+
+	if err := o.Opt.Addr.Set(addr); err != nil {
+		return err
+	}
+
+	return nil
 }

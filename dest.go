@@ -112,7 +112,7 @@ func Set_adddest(o *CmdOptions) (*Vs_cmd_r, error) {
 			Nic:         uint8(o.Dnic),
 			Addr:        o.Addr.Ip,
 			Port:        o.Addr.Port,
-			Conn_flags:  o.Conn_flags,
+			Conn_flags:  o.Conn_flags | VS_CONN_F_FULLNAT,
 			Weight:      o.Weight,
 			U_threshold: uint32(o.U_threshold),
 			L_threshold: uint32(o.L_threshold),

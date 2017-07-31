@@ -18,6 +18,29 @@ import (
 
 const (
 	URL = "/tmp/dpvs.sock"
+
+	/*
+	 *      IPVS Connection Flags
+	 */
+	VS_CONN_F_FWD_MASK   = 0x000f /* mask for the fwd methods */
+	VS_CONN_F_MASQ       = 0x0000 /* masquerading/NAT */
+	VS_CONN_F_LOCALNODE  = 0x0001 /* local node */
+	VS_CONN_F_TUNNEL     = 0x0002 /* tunneling */
+	VS_CONN_F_DROUTE     = 0x0003 /* direct routing */
+	VS_CONN_F_BYPASS     = 0x0004 /* cache bypass */
+	VS_CONN_F_FULLNAT    = 0x0005 /* full nat */
+	VS_CONN_F_DSNAT      = 0x0008 /* dsnat flag */
+	VS_CONN_F_SYNC       = 0x0020 /* entry created by sync */
+	VS_CONN_F_HASHED     = 0x0040 /* hashed entry */
+	VS_CONN_F_NOOUTPUT   = 0x0080 /* no output packets */
+	VS_CONN_F_INACTIVE   = 0x0100 /* not established */
+	VS_CONN_F_OUT_SEQ    = 0x0200 /* must do output seq adjust */
+	VS_CONN_F_IN_SEQ     = 0x0400 /* must do input seq adjust */
+	VS_CONN_F_SEQ_MASK   = 0x0600 /* in/out sequence mask */
+	VS_CONN_F_NO_CPORT   = 0x0800 /* no client port set yet */
+	VS_CONN_F_TEMPLATE   = 0x1000 /* template, not connection */
+	VS_CONN_F_ONE_PACKET = 0x2000 /* forward only one packet */
+	VS_CONN_F_SYNPROXY   = 0x8000 /* syn proxy flag */
 )
 
 var (

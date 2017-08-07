@@ -16,7 +16,7 @@ const (
 )
 
 type Vs_stats_ifa struct {
-	Port       int
+	Port_id    int
 	Rx_packets int64
 	Rx_dropped int64
 	Tx_packets int64
@@ -24,7 +24,7 @@ type Vs_stats_ifa struct {
 }
 
 type Vs_stats_io_entry struct {
-	Core                int
+	Core_id             int
 	Rx_rings_count      []int64
 	Rx_rings_iters      []int64
 	Rx_nic_queues_count []int64
@@ -54,7 +54,7 @@ func (r Vs_stats_io_r) String() string {
 		ret += fmt.Sprintf("%-10s %10s %10s\n",
 			"core", "kni_deq", "kni_deq_err")
 		ret += fmt.Sprintf("%-10d %10d %10d\n\n",
-			e.Core, e.Kni_deq, e.Kni_deq_err)
+			e.Core_id, e.Kni_deq, e.Kni_deq_err)
 		n := max_len(e.Rx_rings_count, e.Rx_nic_queues_count, e.Tx_nic_ports_count)
 		if n > len(e.Kni) {
 			n = len(e.Kni)
@@ -74,7 +74,7 @@ func (r Vs_stats_io_r) String() string {
 			m[k][5] = e.Tx_nic_ports_iters[k]
 		}
 		for k, v := range e.Kni {
-			m[k][6] = int64(v.Port)
+			m[k][6] = int64(v.Port_id)
 			m[k][7] = v.Rx_packets
 			m[k][8] = v.Rx_dropped
 			m[k][9] = v.Tx_packets
@@ -103,20 +103,12 @@ func (r Vs_stats_io_r) String() string {
 }
 
 type Vs_stats_worker_entry struct {
-	Core        int
-	Ipmiss      int64
-	Frag        int64
-	Icmp        int64
-	V4pkt       int64
-	V4sctp      int64
-	V4ospf      int64
-	V4unknow    int64
-	V4drop      int64
-	Kni_enq     int64
-	Kni_enq_err int64
-	Arp         int64
-	Ipv6        int64
-	Unknow      int64
+	Core_id  int
+	Conns    int64
+	Inpkts   int64
+	Outpkts  int64
+	Inbytes  int64
+	Outbytes int64
 }
 
 type Vs_stats_worker_r struct {
@@ -129,25 +121,140 @@ func (r Vs_stats_worker_r) String() string {
 	if r.Code != 0 {
 		return fmt.Sprintf("%s:%s", Ecode(r.Code), r.Msg)
 	}
-	ret := fmt.Sprintf("%-5s %10s %10s %10s %10s "+
-		"%10s %10s %10s %10s %10s "+
-		"%10s %10s %10s %10s\n",
-		"core", "ipmiss", "frag", "icmp", "pkt",
-		"v4sctp", "ospf", "unknow(v4)", "drop", "kni_enq",
-		"kni_err", "arp", "ipv6", "unknow")
+	ret := fmt.Sprintf("%-5s %10s %10s %10s %10s %10s\n",
+		"core", "conns", "InPkts", "OutPkts", "InBytes",
+		"OutBytes")
 	for _, e := range r.Worker {
-		ret += fmt.Sprintf("%-5d %10d %10d %10d %10d "+
-			"%10d %10d %10d %10d %10d "+
-			"%10d %10d %10d %10d\n",
-			e.Core, e.Ipmiss, e.Frag, e.Icmp, e.V4pkt,
-			e.V4sctp, e.V4ospf, e.V4unknow, e.V4drop, e.Kni_enq,
-			e.Kni_enq_err, e.Arp, e.Ipv6, e.Unknow)
+		ret += fmt.Sprintf("%-5d %10d %10d %10d %10d %10d\n",
+			e.Core_id, e.Conns, e.Inpkts, e.Outpkts, e.Inbytes,
+			e.Outbytes)
+	}
+	return ret
+}
+
+/*
+type Vs_estats_worker_entry struct {
+		Core_id                           int
+		Fullnat_add_toa_ok             int64
+		Fullnat_add_toa_fail_len       int64
+		Fullnat_add_toa_head_full      int64
+		Fullnat_add_toa_fail_mem       int64
+		Fullnat_add_toa_fail_proto     int64
+		Fullnat_conn_reused            int64
+		Fullnat_conn_reused_close      int64
+		Fullnat_conn_reused_timewait   int64
+		Fullnat_conn_reused_finwait    int64
+		Fullnat_conn_reused_closewait  int64
+		Fullnat_conn_reused_lastack    int64
+		Fullnat_conn_reused_estab      int64
+		Synproxy_rs_error              int64
+		Synproxy_null_ack              int64
+		Synproxy_bad_ack               int64
+		Synproxy_ok_ack                int64
+		Synproxy_syn_cnt               int64
+		Synproxy_ackstorm              int64
+		Synproxy_synsend_qlen          int64
+		Synproxy_conn_reused           int64
+		Synproxy_conn_reused_close     int64
+		Synproxy_conn_reused_timewait  int64
+		Synproxy_conn_reused_finwait   int64
+		Synproxy_conn_reused_closewait int64
+		Synproxy_conn_reused_lastack   int64
+		Defence_ip_frag_drop           int64
+		Defence_ip_frag_gather         int64
+		Defence_tcp_drop               int64
+		Defence_udp_drop               int64
+		Fast_xmit_reject               int64
+		Fast_xmit_pass                 int64
+		Fast_xmit_skb_copy             int64
+		Fast_xmit_no_mac               int64
+		Fast_xmit_synproxy_save        int64
+		Fast_xmit_dev_lost             int64
+		Rst_in_syn_sent                int64
+		Rst_out_syn_sent               int64
+		Rst_in_established             int64
+		Rst_out_established            int64
+		Gro_pass                       int64
+		Lro_reject                     int64
+		Xmit_unexpected_mtu            int64
+		Conn_sched_unreach             int64
+}
+*/
+
+var estats_names = []string{
+	"core_id",
+	"fullnat_add_toa_ok",
+	"fullnat_add_toa_fail_len",
+	"fullnat_add_toa_head_full",
+	"fullnat_add_toa_fail_mem",
+	"fullnat_add_toa_fail_proto",
+	"fullnat_conn_reused",
+	"fullnat_conn_reused_close",
+	"fullnat_conn_reused_timewait",
+	"fullnat_conn_reused_finwait",
+	"fullnat_conn_reused_closewait",
+	"fullnat_conn_reused_lastack",
+	"fullnat_conn_reused_estab",
+	"synproxy_rs_error",
+	"synproxy_null_ack",
+	"synproxy_bad_ack",
+	"synproxy_ok_ack",
+	"synproxy_syn_cnt",
+	"synproxy_ackstorm",
+	"synproxy_synsend_qlen",
+	"synproxy_conn_reused",
+	"synproxy_conn_reused_close",
+	"synproxy_conn_reused_timewait",
+	"synproxy_conn_reused_finwait",
+	"synproxy_conn_reused_closewait",
+	"synproxy_conn_reused_lastack",
+	"defence_ip_frag_drop",
+	"defence_ip_frag_gather",
+	"defence_tcp_drop",
+	"defence_udp_drop",
+	"fast_xmit_reject",
+	"fast_xmit_pass",
+	"fast_xmit_skb_copy",
+	"fast_xmit_no_mac",
+	"fast_xmit_synproxy_save",
+	"fast_xmit_dev_lost",
+	"rst_in_syn_sent",
+	"rst_out_syn_sent",
+	"rst_in_established",
+	"rst_out_established",
+	"gro_pass",
+	"lro_reject",
+	"xmit_unexpected_mtu",
+	"conn_sched_unreach",
+}
+
+type Vs_estats_worker_r struct {
+	Code   int
+	Msg    string
+	Worker []map[string]int64
+}
+
+func (r Vs_estats_worker_r) String() (ret string) {
+	if r.Code != 0 {
+		return fmt.Sprintf("%s:%s", Ecode(r.Code), r.Msg)
+	}
+
+	if len(r.Worker) == 0 {
+		return fmt.Sprintf("No such object")
+	}
+
+	for _, name := range estats_names {
+		ret += fmt.Sprintf("%-32s", name)
+		for _, e := range r.Worker {
+			ret += fmt.Sprintf(" %10d", e[name])
+		}
+		ret += "\n"
 	}
 	return ret
 }
 
 type Vs_stats_dev_entry struct {
-	Port      int
+	Port_id   int
 	Ipackets  int64
 	Opackets  int64
 	Ibytes    int64
@@ -169,11 +276,11 @@ func (r Vs_stats_dev_r) String() string {
 		return fmt.Sprintf("%s:%s", Ecode(r.Code), r.Msg)
 	}
 	ret := fmt.Sprintf("%-10s %10s %10s %10s %10s %10s %10s %10s %10s\n",
-		"port", "ipackets", "opackets", "ibytes", "obytes",
+		"port_id", "ipackets", "opackets", "ibytes", "obytes",
 		"imissed", "ierrors", "oerrors", "rx_nombuf")
 	for _, e := range r.Dev {
 		ret += fmt.Sprintf("%-10d %10d %10d %10d %10d %10d %10d %10d %10d\n",
-			e.Port, e.Ipackets, e.Opackets, e.Ibytes, e.Obytes,
+			e.Port_id, e.Ipackets, e.Opackets, e.Ibytes, e.Obytes,
 			e.Imissed, e.Ierrors, e.Oerrors, e.Rx_nombuf)
 	}
 	return ret
@@ -281,6 +388,14 @@ func Get_stats_io(id int) (*Vs_stats_io_r, error) {
 func Get_stats_worker(id int) (*Vs_stats_worker_r, error) {
 	args := Vs_stats_q{Type: VS_STATS_WORKER, Id: id}
 	reply := &Vs_stats_worker_r{}
+
+	err := client.Call("stats", args, reply)
+	return reply, err
+}
+
+func Get_estats_worker(id int) (*Vs_estats_worker_r, error) {
+	args := Vs_stats_q{Type: VS_ESTATS_WORKER, Id: id}
+	reply := &Vs_estats_worker_r{}
 
 	err := client.Call("stats", args, reply)
 	return reply, err

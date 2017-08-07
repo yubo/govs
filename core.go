@@ -205,6 +205,7 @@ func (r Vs_timeout_r) String() string {
 const (
 	VS_STATS_IO = iota
 	VS_STATS_WORKER
+	VS_ESTATS_WORKER
 	VS_STATS_DEV
 	VS_STATS_CTL
 	VS_STATS_MEM

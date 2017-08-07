@@ -25,8 +25,8 @@ func init() {
 
 	// status
 	cmd := flags.NewCommand("stats", "get dpvs stats io stats", stats_handle, flag.ExitOnError)
-	cmd.StringVar(&govs.CmdOpt.Typ, "t", "io", "type of the stats name(io/worker/dev/ctl/mem)")
-	cmd.IntVar(&govs.CmdOpt.Id, "i", 0, "id of the stats object")
+	cmd.StringVar(&govs.CmdOpt.Typ, "t", "io", "type of the stats name(io/w/we/dev/ctl/mem)")
+	cmd.IntVar(&govs.CmdOpt.Id, "i", -1, "id of the stats object")
 
 	// flush
 	flags.NewCommand("flush", "Flush the virtual service", flush_handle, flag.ExitOnError)
@@ -321,23 +321,32 @@ func del_handle(arg interface{}) {
 }
 
 func stats_handle(arg interface{}) {
+	id := govs.CmdOpt.Id
+
 	switch govs.CmdOpt.Typ {
 	case "io":
-		relay, err := govs.Get_stats_io(govs.CmdOpt.Id)
+		relay, err := govs.Get_stats_io(id)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 		fmt.Println(relay)
-	case "worker":
-		relay, err := govs.Get_stats_worker(govs.CmdOpt.Id)
+	case "w":
+		relay, err := govs.Get_stats_worker(id)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(relay)
+	case "we":
+		relay, err := govs.Get_estats_worker(id)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 		fmt.Println(relay)
 	case "dev":
-		relay, err := govs.Get_stats_dev(govs.CmdOpt.Id)
+		relay, err := govs.Get_stats_dev(id)
 		if err != nil {
 			fmt.Println(err)
 			return

@@ -92,14 +92,32 @@ type CmdOptions struct {
 
 type Be32 uint32
 
-func (p *Be32) Set(value string) error {
-	if value == "" {
-		return nil
+func (p *Be32) Set(s string) error {
+	var ip [4]byte
+	for i := 0; i < 4; i++ {
+		if len(s) == 0 {
+			// Missing octets.
+			return errIpv4
+		}
+		if i > 0 {
+			if s[0] != '.' {
+				return errIpv4
+			}
+			s = s[1:]
+		}
+		n, c, ok := dtoi(s)
+		if !ok || n > 0xFF {
+			return errIpv4
+		}
+		s = s[c:]
+		ip[i] = byte(n)
 	}
-	if ip := net.ParseIP(value).To4(); ip != nil {
-		*p = Htonl(ipToU32(ip))
+	if len(s) != 0 {
+		return errIpv4
 	}
-	return errIpv4
+
+	*p = Htonl((uint32(ip[0]) << 24) | (uint32(ip[1]) << 16) | (uint32(ip[2]) << 8) | uint32(ip[3]))
+	return nil
 }
 
 func (p Be32) String() string {

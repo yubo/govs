@@ -99,7 +99,7 @@ func (p *Be32) Set(value string) error {
 	if ip := net.ParseIP(value).To4(); ip != nil {
 		*p = Htonl(ipToU32(ip))
 	}
-	return errIpv4
+	return nil
 }
 
 func (p Be32) String() string {

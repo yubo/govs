@@ -20,7 +20,7 @@ type Vs_laddr_user struct {
 type Vs_laddr_user_r struct {
 	Addr          Be32
 	Conn_counts   uint32
-	Port_conflict string
+	Port_conflict uint64
 }
 
 func Laddr_title() string {
@@ -29,7 +29,7 @@ func Laddr_title() string {
 }
 
 func (l Vs_laddr_user_r) String() string {
-	return fmt.Sprintf("    %15s %8d %8s",
+	return fmt.Sprintf("    %15s %8d %8d",
 		l.Addr.String(),
 		l.Conn_counts, l.Port_conflict)
 }

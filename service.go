@@ -128,7 +128,7 @@ func Get_service(o *CmdOptions) (*Vs_list_service_r, error) {
 			Protocol: uint8(o.Protocol),
 		},
 	}
-	fmt.Printf("ip:%pvs prot:%d, protocol: %d\n",
+	fmt.Printf("ip:%s, port:%d, protocol: %d\n",
 		args.Service.Addr.String(), args.Service.Port, args.Service.Protocol)
 
 	err := client.Call("api", args, &reply)

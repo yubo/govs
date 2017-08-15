@@ -134,9 +134,9 @@ func Set_editdest(o *CmdOptions) (*Vs_cmd_r, error) {
 		},
 		Dest: Vs_dest_user{
 			Nic:         uint8(o.Dnic),
-			Addr:        o.Addr.Ip,
-			Port:        o.Addr.Port,
-			Conn_flags:  o.Conn_flags,
+			Addr:        o.Daddr.Ip,
+			Port:        o.Daddr.Port,
+			Conn_flags:  o.Conn_flags | VS_CONN_F_FULLNAT,
 			Weight:      o.Weight,
 			U_threshold: uint32(o.U_threshold),
 			L_threshold: uint32(o.L_threshold),
@@ -157,8 +157,8 @@ func Set_deldest(o *CmdOptions) (*Vs_cmd_r, error) {
 			Port:     o.Addr.Port,
 		},
 		Dest: Vs_dest_user{
-			Addr: o.Addr.Ip,
-			Port: o.Addr.Port,
+			Addr: o.Daddr.Ip,
+			Port: o.Daddr.Port,
 		},
 	}
 

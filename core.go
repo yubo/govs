@@ -41,6 +41,16 @@ const (
 	VS_CONN_F_TEMPLATE   = 0x1000 /* template, not connection */
 	VS_CONN_F_ONE_PACKET = 0x2000 /* forward only one packet */
 	VS_CONN_F_SYNPROXY   = 0x8000 /* syn proxy flag */
+
+	VS_SVC_F_PERSISTENT = 0x0001             /* persistent port */
+	VS_SVC_F_HASHED     = 0x0002             /* hashed entry */
+	VS_SVC_F_ONEPACKET  = 0x0004             /* one-packet scheduling */
+	VS_SVC_F_SYNPROXY   = VS_CONN_F_SYNPROXY /* synproxy flag */
+	VS_SVC_F_DSNAT      = VS_CONN_F_DSNAT    /* dsnat flag */
+	VS_SVC_F_MASK       = (VS_SVC_F_PERSISTENT |
+		VS_SVC_F_ONEPACKET |
+		VS_SVC_F_SYNPROXY |
+		VS_SVC_F_DSNAT)
 )
 
 var (

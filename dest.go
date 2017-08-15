@@ -157,8 +157,8 @@ func Set_deldest(o *CmdOptions) (*Vs_cmd_r, error) {
 			Port:     o.Addr.Port,
 		},
 		Dest: Vs_dest_user{
-			Addr: o.Addr.Ip,
-			Port: o.Addr.Port,
+			Addr: o.Daddr.Ip,
+			Port: o.Daddr.Port,
 		},
 	}
 

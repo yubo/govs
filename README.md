@@ -20,29 +20,28 @@ io core information
 
 ```
 #govs stats -t io
-core          kni_deq kni_deq_err
-2          37625569804 37625368197
-
-id          rx_ring_c  rx_ring_i rx_nic_q_c rx_nic_q_i tx_nic_p_c tx_nic_p_i   kni_port kni_rx_pkt kni_rx_drop kni_tx_pkt kni_tx_drop
-0                   0          0     120146     119922          0          0          0      99129          0         70          0
-1                   0          0     123571     123284          0          0          1     102556          0      10318          0
-
+core_id                                   2
+rx_ring_0                                 0          0
+rx_ring_1                                 0          0
+Rx_nic_port0_queue0                   20537       5539
+Rx_nic_port1_queue1                     495        495
+Rx_nic_port2_queue2                       5          5
+Rx_nic_port3_queue3                       0          0
+tx_nic_port0                              0          0
+tx_nic_port1                           1192       1192
+veth0                            Rx_packets         45 Rx_dropped          0 Tx_packets          8 Tx_dropped          0
+veth1                            Rx_packets          0 Rx_dropped          0 Tx_packets       4000 Tx_dropped          0
+kni_deq                          128726359132
+kni_deq_err                      128726359087
 ```
 
-- core: core id
+- core_id: core id
+- rx_ring_worker?:  calls number of rte_ring_sp_enqueue_bulk()
+- rx_nic_port?_queue?:  number of mbufs get from rte_eth_rx_burst()
+- tx_nic_port?:  number of mbufs get from rte_eth_tx_burst()
+- veth?: kni dev counter
 - kni_deq:     calls number of rte_ring_sc_dequeue_burst(..)
 - kni_deq_err: calls number of failed rte_ring_sc_dequeue_burst(..)
-- rx_ring_c:   calls number of rte_ring_sp_enqueue_bulk()
-- rx_ring_i:   calls number of failed rte_ring_sp_enqueue_bulk()
-- rx_nic_q_c:  number of mbufs get from rte_eth_rx_burst(port, queue, ...)
-- rx_nic_q_i:  calls number of function calls at rte_eth_rx_burst(port, queue, ...)
-- tx_nic_p_c:  number of mbufs get from rte_eth_tx_burst(port, ...)
-- tx_nic_p_i:  calls number of rte_eth_tx_burst(port, ...)
-- kni_port:    port number of kni
-- kni_rx_pkt:  number of pkts received from NIC, and sent to KNI
-- kni_rx_drop: number of pkts received from NIC, but failed to send to KNI
-- kni_tx_pkt:  number of pkts received from KNI, and sent to NIC
-- kni_tx_drop: number of pkts received from KNI, but failed to send to NIC
 
 
 ```

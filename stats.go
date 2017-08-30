@@ -29,8 +29,11 @@ type Vs_stats_io_entry struct {
 	Rx_rings_iters      []int64
 	Rx_nic_queues_count []int64
 	Rx_nic_queues_iters []int64
+	Rx_nic_queues_port  []int32
+	Rx_nic_queues_queue []int32
 	Tx_nic_ports_count  []int64
 	Tx_nic_ports_iters  []int64
+	Tx_nic_ports_port   []int32
 	Kni                 []Vs_stats_ifa
 	Kni_deq             int64
 	Kni_deq_err         int64
@@ -50,54 +53,43 @@ func (r Vs_stats_io_r) String() string {
 		return fmt.Sprintf("%s:%s", Ecode(r.Code), r.Msg)
 	}
 	var ret string
+
 	for _, e := range r.Io {
-		ret += fmt.Sprintf("%-10s %10s %10s\n",
-			"core", "kni_deq", "kni_deq_err")
-		ret += fmt.Sprintf("%-10d %10d %10d\n\n",
-			e.Core_id, e.Kni_deq, e.Kni_deq_err)
-		n := max_len(e.Rx_rings_count, e.Rx_nic_queues_count, e.Tx_nic_ports_count)
-		if n > len(e.Kni) {
-			n = len(e.Kni)
+		ret += fmt.Sprintf("%-32s %-10s %10d\n", "core_id", "", e.Core_id)
+
+		for i, _ := range e.Rx_rings_count {
+			ret += fmt.Sprintf("%-32s %-10s %10d %-10s %10d\n",
+				fmt.Sprintf("rx_ring_worker%02d", i),
+				"error", e.Rx_rings_iters[i]-e.Rx_rings_count[i],
+				"calls", e.Rx_rings_iters[i])
 		}
 
-		m := make([][11]int64, n)
-		for k, _ := range e.Rx_rings_count {
-			m[k][0] = e.Rx_rings_count[k]
-			m[k][1] = e.Rx_rings_iters[k]
-		}
-		for k, _ := range e.Rx_nic_queues_count {
-			m[k][2] = e.Rx_nic_queues_count[k]
-			m[k][3] = e.Rx_nic_queues_iters[k]
-		}
-		for k, _ := range e.Tx_nic_ports_count {
-			m[k][4] = e.Tx_nic_ports_count[k]
-			m[k][5] = e.Tx_nic_ports_iters[k]
-		}
-		for k, v := range e.Kni {
-			m[k][6] = int64(v.Port_id)
-			m[k][7] = v.Rx_packets
-			m[k][8] = v.Rx_dropped
-			m[k][9] = v.Tx_packets
-			m[k][10] = v.Tx_dropped
+		for i, _ := range e.Rx_nic_queues_count {
+			ret += fmt.Sprintf("%-32s %-10s %10d %-10s %10d\n",
+				fmt.Sprintf("Rx_nic_port%d_queue%02d",
+					e.Rx_nic_queues_port[i], e.Rx_nic_queues_queue[i]),
+				"sum", e.Rx_nic_queues_count[i],
+				"calls", e.Rx_nic_queues_iters[i])
 		}
 
-		ret += fmt.Sprintf("%-10s %10s %10s %10s %10s "+
-			"%10s %10s %10s %10s %10s "+
-			"%10s %10s\n",
-			"id", "rx_ring_c", "rx_ring_i", "rx_nic_q_c", "rx_nic_q_i",
-			"tx_nic_p_c", "tx_nic_p_i", "kni_port", "kni_rx_pkt", "kni_rx_drop",
-			"kni_tx_pkt", "kni_tx_drop")
-		for i := 0; i < n; i++ {
-			ret += fmt.Sprintf("%-10d %10d %10d %10d %10d "+
-				"%10d %10d %10d %10d %10d "+
-				"%10d %10d\n",
-				i, m[i][0], m[i][1], m[i][2], m[i][3],
-				m[i][4], m[i][5], m[i][6], m[i][7], m[i][8],
-				m[i][9], m[i][10])
+		for i, _ := range e.Tx_nic_ports_count {
+			ret += fmt.Sprintf("%-32s %-10s %10d %-10s %10d\n",
+				fmt.Sprintf("tx_nic_port%d", e.Tx_nic_ports_port[i]),
+				"sum", e.Tx_nic_ports_count[i],
+				"calls", e.Tx_nic_ports_iters[i])
 		}
 
-		ret += fmt.Sprintf("\n")
+		for _, kni := range e.Kni {
+			ret += fmt.Sprintf("%-32s %-10s %10d %-10s %10d "+
+				"%-10s %10d %-10s %10d\n",
+				fmt.Sprintf("veth%d", kni.Port_id),
+				"rx_pkts", kni.Rx_packets,
+				"rx_drop", kni.Rx_dropped,
+				"tx_pkts", kni.Tx_packets,
+				"tx_drop", kni.Tx_dropped)
+		}
 
+		ret += fmt.Sprintf("%-32s %-10s %10d %-10s %10d\n\n", "kni", "deq", e.Kni_deq, "deq_err", e.Kni_deq_err)
 	}
 	return ret
 }
@@ -123,7 +115,7 @@ func (r Vs_stats_worker_r) String() string {
 	}
 	ret := fmt.Sprintf("%-5s %10s %10s %10s %10s %10s\n",
 		"core", "conns", "InPkts", "OutPkts", "InBytes",
-		"OutBytes")
+		"OutBytes1")
 	for _, e := range r.Worker {
 		ret += fmt.Sprintf("%-5d %10d %10d %10d %10d %10d\n",
 			e.Core_id, e.Conns, e.Inpkts, e.Outpkts, e.Inbytes,
@@ -131,55 +123,6 @@ func (r Vs_stats_worker_r) String() string {
 	}
 	return ret
 }
-
-/*
-type Vs_estats_worker_entry struct {
-		Core_id                           int
-		Fullnat_add_toa_ok             int64
-		Fullnat_add_toa_fail_len       int64
-		Fullnat_add_toa_head_full      int64
-		Fullnat_add_toa_fail_mem       int64
-		Fullnat_add_toa_fail_proto     int64
-		Fullnat_conn_reused            int64
-		Fullnat_conn_reused_close      int64
-		Fullnat_conn_reused_timewait   int64
-		Fullnat_conn_reused_finwait    int64
-		Fullnat_conn_reused_closewait  int64
-		Fullnat_conn_reused_lastack    int64
-		Fullnat_conn_reused_estab      int64
-		Synproxy_rs_error              int64
-		Synproxy_null_ack              int64
-		Synproxy_bad_ack               int64
-		Synproxy_ok_ack                int64
-		Synproxy_syn_cnt               int64
-		Synproxy_ackstorm              int64
-		Synproxy_synsend_qlen          int64
-		Synproxy_conn_reused           int64
-		Synproxy_conn_reused_close     int64
-		Synproxy_conn_reused_timewait  int64
-		Synproxy_conn_reused_finwait   int64
-		Synproxy_conn_reused_closewait int64
-		Synproxy_conn_reused_lastack   int64
-		Defence_ip_frag_drop           int64
-		Defence_ip_frag_gather         int64
-		Defence_tcp_drop               int64
-		Defence_udp_drop               int64
-		Fast_xmit_reject               int64
-		Fast_xmit_pass                 int64
-		Fast_xmit_skb_copy             int64
-		Fast_xmit_no_mac               int64
-		Fast_xmit_synproxy_save        int64
-		Fast_xmit_dev_lost             int64
-		Rst_in_syn_sent                int64
-		Rst_out_syn_sent               int64
-		Rst_in_established             int64
-		Rst_out_established            int64
-		Gro_pass                       int64
-		Lro_reject                     int64
-		Xmit_unexpected_mtu            int64
-		Conn_sched_unreach             int64
-}
-*/
 
 var estats_names = []string{
 	"core_id",

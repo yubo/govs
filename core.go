@@ -8,6 +8,7 @@
 package govs
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/rpc"
@@ -114,6 +115,15 @@ func (p *Be32) Set(value string) error {
 
 func (p Be32) String() string {
 	return be32_to_addr(p)
+}
+
+func (p *Be32) UnmarshalJSON(data []byte) error {
+	var i int32
+	if err := json.Unmarshal(data, &i); err != nil {
+		return err
+	}
+	*p = Be32(uint32(i))
+	return nil
 }
 
 type Be16 uint16

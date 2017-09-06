@@ -24,21 +24,27 @@ type Vs_stats_ifa struct {
 }
 
 type Vs_stats_io_entry struct {
-	Core_id             int
-	Rx_rings_iters      []int64
-	Rx_rings_count      []int64
-	Rx_rings_drop       []int64
+	Core_id int
+
 	Rx_nic_queues_port  []int32
 	Rx_nic_queues_queue []int32
 	Rx_nic_queues_iters []int64
-	Rx_nic_queues_count []int64
-	Tx_nic_ports_port   []int32
-	Tx_nic_ports_iters  []int64
-	Tx_nic_ports_count  []int64
-	Tx_nic_ports_drop   []int64
-	Kni                 []Vs_stats_ifa
-	Kni_deq             int64
-	Kni_deq_err         int64
+	Rx_nic_queues_pkts  []int64
+
+	Rx_rings_iters      []int64
+	Rx_rings_pkts       []int64
+	Rx_rings_drop_iters []int64
+	Rx_rings_drop_pkts  []int64
+	Rx_rings_drop_count []int64
+
+	Tx_nic_ports_port       []int32
+	Tx_nic_ports_queue      []int32
+	Tx_nic_ports_iters      []int64
+	Tx_nic_ports_pkts       []int64
+	Tx_nic_ports_drop_iters []int64
+	Tx_nic_ports_drop_pkts  []int64
+
+	Kni []Vs_stats_ifa
 }
 
 type Vs_stats_io_r struct {
@@ -57,60 +63,68 @@ func (r Vs_stats_io_r) String() string {
 	var ret string
 
 	for _, e := range r.Io {
-		ret += fmt.Sprintf("%-32s %-10s %10d\n", "", "core_id", e.Core_id)
+		ret += fmt.Sprintf("\n%-32s %-10s %10d\n", "#######", "core_id", e.Core_id)
 
 		for i, _ := range e.Rx_nic_queues_iters {
 			ret += fmt.Sprintf("%-32s %-10s %10d %-10s %10d\n",
 				fmt.Sprintf("Rx_nic_port%d_queue%02d",
 					e.Rx_nic_queues_port[i], e.Rx_nic_queues_queue[i]),
-				"packets", e.Rx_nic_queues_count[i],
-				"calls", e.Rx_nic_queues_iters[i])
+				"iters", e.Rx_nic_queues_iters[i],
+				"packets", e.Rx_nic_queues_pkts[i],
+			)
 		}
 
 		for i, _ := range e.Rx_rings_iters {
-			ret += fmt.Sprintf("%-32s %-10s %10d %-10s %10d %-10s %10d\n",
+			ret += fmt.Sprintf("%-32s %-10s %10d %-10s %10d %-10s %10d %-10s %10d %-10s %10f\n",
 				fmt.Sprintf("rx_ring_worker%02d", i),
-				"dropped", e.Rx_rings_drop[i],
-				"packets", e.Rx_rings_count[i],
-				"calls", e.Rx_rings_iters[i])
+				"iters", e.Rx_rings_iters[i],
+				"packets", e.Rx_rings_pkts[i],
+				"drop iters", e.Rx_rings_drop_iters[i],
+				"drop pkts", e.Rx_rings_drop_pkts[i],
+				"drop cnt", float64(e.Rx_rings_drop_count[i])/float64(e.Rx_rings_drop_iters[i]),
+			)
 		}
 
 		for i, _ := range e.Tx_nic_ports_iters {
-			ret += fmt.Sprintf("%-32s %-10s %10d %-10s %10d\n",
+			ret += fmt.Sprintf("%-32s %-10s %10d %-10s %10d %-10s %10d %-10s %10d\n",
 				fmt.Sprintf("tx_nic_port%d", e.Tx_nic_ports_port[i]),
-				"packets", e.Tx_nic_ports_count[i],
-				"calls", e.Tx_nic_ports_iters[i])
+				"iters", e.Tx_nic_ports_iters[i],
+				"packets", e.Tx_nic_ports_pkts[i],
+				"drop iters", e.Tx_nic_ports_drop_iters[i],
+				"drop pkts", e.Tx_nic_ports_drop_pkts[i],
+			)
 		}
 
 		for _, kni := range e.Kni {
 			ret += fmt.Sprintf("%-32s %-10s %10d %-10s %10d "+
 				"%-10s %10d %-10s %10d\n",
 				fmt.Sprintf("veth%d", kni.Port_id),
-				"rx_pkts", kni.Rx_packets,
-				"rx_drop", kni.Rx_dropped,
-				"tx_pkts", kni.Tx_packets,
-				"tx_drop", kni.Tx_dropped)
+				"rx_packets", kni.Rx_packets,
+				"rx_dropped", kni.Rx_dropped,
+				"tx_packets", kni.Tx_packets,
+				"tx_dropped", kni.Tx_dropped)
 		}
-
-		ret += fmt.Sprintf("%-32s %-10s %10d %-10s %10d\n\n", "kni", "deq", e.Kni_deq, "deq_err", e.Kni_deq_err)
 	}
 	return ret
 }
 
 type Vs_stats_worker_entry struct {
-	Core_id         int
-	Conns           int64
-	Inpkts          int64
-	Outpkts         int64
-	Inbytes         int64
-	Outbytes        int64
-	Rings_in_iters  []int64
-	Rings_in_count  []int64
-	Rings_out_port  []int32
-	Rings_out_iters []int64
-	Rings_out_count []int64
-	Rings_out_drop  []int64
-	Vs_drop         []int64
+	Core_id              int
+	Conns                int64
+	Inpkts               int64
+	Outpkts              int64
+	Inbytes              int64
+	Outbytes             int64
+	Rings_in_iters       []int64
+	Rings_in_pkts        []int64
+	Rings_in_miss        []int64
+	Rings_in_miss_count  []int64
+	Rings_out_port       []int32
+	Rings_out_iters      []int64
+	Rings_out_pkts       []int64
+	Rings_out_drop_iters []int64
+	Rings_out_drop_pkts  []int64
+	Vs_drop              []int64
 }
 
 type Vs_stats_worker_r struct {
@@ -136,19 +150,23 @@ func (r Vs_stats_worker_r) String() string {
 			"Out", "packets", e.Outpkts, "bytes", e.Outbytes)
 
 		for i, _ := range e.Rings_in_iters {
-			ret += fmt.Sprintf("%-32s %-10s %10d %-10s %10d\n",
-				fmt.Sprintf("rings_in_worker%02d", i),
-				"packets", e.Rings_in_count[i],
-				"calls", e.Rings_in_iters[i],
+			ret += fmt.Sprintf("%-32s %-10s %10d %-10s %10d %-10s %10d %-10s %10d %-10s %10f\n",
+				fmt.Sprintf("rings_in_io%02d", i),
+				"iters", e.Rings_in_iters[i],
+				"packets", e.Rings_in_pkts[i],
+				"miss", e.Rings_in_miss[i],
+				"miss_count", e.Rings_in_miss_count[i],
+				"bsz", float64(e.Rings_in_miss_count[i])/float64(e.Rings_in_miss[i]),
 			)
 		}
 
 		for i, _ := range e.Rings_out_iters {
-			ret += fmt.Sprintf("%-32s %-10s %10d %-10s %10d %-10s %10d\n",
+			ret += fmt.Sprintf("%-32s %-10s %10d %-10s %10d %-10s %10d %-10s %10d\n",
 				fmt.Sprintf("rings_out_port%02d", e.Rings_out_port[i]),
-				"dropped", e.Rings_out_drop[i],
-				"packets", e.Rings_out_count[i],
-				"calls", e.Rings_out_iters[i],
+				"iters", e.Rings_out_iters[i],
+				"packets", e.Rings_out_pkts[i],
+				"drop iters", e.Rings_out_drop_iters[i],
+				"drop pkts", e.Rings_out_drop_pkts[i],
 			)
 		}
 		ret += "\n"
